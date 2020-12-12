@@ -21,6 +21,15 @@ JNE = 0b01010110
 # which is the register which hold value
 SP = 7
 
+# stretch
+AND = 0b10101000
+XOR = 0b10101011
+OR = 0b10101010
+NOT = 0b01101001
+SHL = 0b10101100
+SHR = 0b10101101
+MOD = 0b10100100
+
 class CPU:
     """Main CPU class."""
 
@@ -61,7 +70,7 @@ class CPU:
             self.ram_write(instruction, address)
             address += 1
 
-    def alu(self, op, reg_a, reg_b):
+    def alu(self, op, reg_a, reg_b = None):
         """ALU operations."""
 
         # set variables to for flags
@@ -87,6 +96,28 @@ class CPU:
                 self.flags['G'] = 1
             else:
                 self.flags['G'] = 0
+            self.pc += 3
+        # stretch
+        elif op == AND:
+            self.registers[reg_a] &= self.registers[reg_b]
+            self.pc += 3
+        elif op == OR:
+            self.registers[reg_a] |= self.registers[reg_b]
+            self.pc += 3
+        elif op == XOR:
+            self.registers[reg_a] ^= self.registers[reg_b]
+            self.pc += 3
+        elif op == NOT:
+            self.registers[reg_a] = ~self.registers[reg_a]
+            self.pc += 2
+        elif op == SHL:
+            self.registers[reg_a] <<= self.registers[reg_b]
+            self.pc += 3
+        elif op == SHR:
+            self.registers[reg_a] >>= self.registers[reg_b]
+            self.pc += 3
+        elif op == MOD:
+            self.registers[reg_a] %= self.registers[reg_b]
             self.pc += 3
         else:
             raise Exception("Unsupported ALU operation")
@@ -202,5 +233,19 @@ class CPU:
             self.jeq(operand_a)
         elif instruction == JNE:
             self.jne(operand_a)
+        elif instruction == AND:
+            self.alu(instruction, operand_a, operand_b)
+        elif instruction == OR:
+            self.alu(instruction, operand_a, operand_b)
+        elif instruction == XOR:
+            self.alu(instruction, operand_a, operand_b)
+        elif instruction == NOT:
+            self.alu(instruction, operand_a)
+        elif instruction == SHL:
+            self.alu(instruction, operand_a, operand_b)
+        elif instruction == SHR:
+            self.alu(instruction, operand_a, operand_b)
+        elif instruction == MOD:
+            self.alu(instruction, operand_a, operand_b)
         else:
             print("Don't know what to do.")
